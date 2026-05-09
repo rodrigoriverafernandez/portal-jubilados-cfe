@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "autores",
+  "info": {
+    "singularName": "autor",
+    "pluralName": "autores",
+    "displayName": "Autor",
+    "description": "Autores del portal y equipo editorial"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": true
+    }
+  },
+  "attributes": {
+    "nombre": {
+      "type": "string",
+      "required": true
+    },
+    "fotografia": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "biografia": {
+      "type": "richtext"
+    },
+    "cargo": {
+      "type": "string"
+    },
+    "redes_sociales": {
+      "type": "component",
+      "repeatable": true,
+      "component": "social.social-link"
+    }
+  }
+}

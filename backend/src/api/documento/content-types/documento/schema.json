@@ -1,0 +1,40 @@
+{
+  "kind": "collectionType",
+  "collectionName": "documentos",
+  "info": {
+    "singularName": "documento",
+    "pluralName": "documentos",
+    "displayName": "Documento",
+    "description": "Documentos descargables y archivos PDF para el portal editorial"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": true
+    }
+  },
+  "attributes": {
+    "titulo": {
+      "type": "string",
+      "required": true
+    },
+    "archivo_pdf": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["files"]
+    },
+    "descripcion": {
+      "type": "text"
+    },
+    "categoria": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::categoria.categoria"
+    }
+  }
+}

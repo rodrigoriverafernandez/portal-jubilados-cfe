@@ -1,0 +1,16 @@
+node_modules
+npm-debug.log*
+yarn-error.log*
+.pnp*
+.pnpm-debug.log*
+.git
+.gitignore
+.env
+.DS_Store
+.idea
+.vscode
+tmp
+build
+dist
+# public/uploads
+!public/uploads/.gitkeep
