@@ -24,3 +24,45 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Accessibility Mode */
+.accessibility-mode {
+  font-size: 1.2rem;
+}
+
+.accessibility-mode h1 {
+  font-size: 3rem;
+}
+
+.accessibility-mode h2 {
+  font-size: 2.5rem;
+}
+
+.accessibility-mode h3 {
+  font-size: 2rem;
+}
+
+.accessibility-mode p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.accessibility-mode button,
+.accessibility-mode a {
+  font-size: 1.1rem;
+  padding: 0.75rem 1.5rem;
+}
+
+/* High contrast */
+.accessibility-mode {
+  --tw-ring-color: rgb(0 0 0);
+  --tw-border-color: rgb(0 0 0);
+}
+
+/* Line clamp utility */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

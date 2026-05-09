@@ -6,16 +6,19 @@ import type { Articulo, Autor, Categoria, Evento, StrapiResponse } from "./types
  * - On client (browser): http://localhost:1337 (external access)
  */
 function getApiUrl(): string {
-  // Check if running on server side (Node.js)
-  if (typeof window === "undefined") {
-    // Server-side: use internal Docker service name
-    return process.env.STRAPI_API_URL || "http://strapi:1337";
-  }
-  // Client-side: use public URL
+  // For development, always use localhost since Next.js runs on host
   return process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 }
 
 export const API_URL = getApiUrl();
+
+const ENDPOINTS = {
+  articulos: "/api/articulos",
+  categorias: "/api/categorias",
+  autores: "/api/autores",
+  eventos: "/api/eventos",
+  documentos: "/api/documentos",
+};
 
 /**
  * Enhanced Strapi API client with robust error handling
@@ -45,9 +48,9 @@ async function fetchStrapi<T>(path: string): Promise<StrapiResponse<T>> {
       // Try to parse error message
       try {
         const errorData = await response.json();
-        console.error("[Strapi API Error]", errorData);
+        console.warn("[Strapi API Error]", errorData);
       } catch {
-        console.error(`[Strapi] Request failed: ${response.statusText}`);
+        console.warn(`[Strapi] Request failed: ${response.statusText}`);
       }
       
       return { data: [] as any };
@@ -57,7 +60,7 @@ async function fetchStrapi<T>(path: string): Promise<StrapiResponse<T>> {
     return data;
   } catch (error) {
     // Handle network errors, CORS issues, etc.
-    console.error(
+    console.warn(
       "[Strapi Fetch Error]",
       error instanceof Error ? error.message : error,
       "URL:",
@@ -69,33 +72,34 @@ async function fetchStrapi<T>(path: string): Promise<StrapiResponse<T>> {
   }
 }
 
-const articlePopulate =
-  "?populate[imagen_principal]=*&populate[galeria]=*&populate[categoria]=*&populate[autor]=*";
+const articlePopulate = ""; // Temporarily removed populate to avoid errors
 
 export async function getArticulos(): Promise<Articulo[]> {
-  const params = `${articlePopulate}&sort[0]=fecha_publicacion:desc&pagination[limit]=12`;
+  const baseParams = "sort[0]=fecha_publicacion:desc&pagination[limit]=12";
+  const params = articlePopulate ? `${articlePopulate}&${baseParams}` : `?${baseParams}`;
   try {
-    const response = await fetchStrapi<any>(`/api/articulos${params}`);
+    const response = await fetchStrapi<any>(`${ENDPOINTS.articulos}${params}`);
     if (!response.data || !Array.isArray(response.data)) {
       return [];
     }
     return response.data.map((item: any) => formatArticulo(item));
   } catch (error) {
-    console.error("[getArticulos]", error);
+    console.warn("[getArticulos]", error);
     return [];
   }
 }
 
 export async function getArticulosDestacados(): Promise<Articulo[]> {
-  const params = `${articlePopulate}&filters[destacado][$eq]=true&sort[0]=fecha_publicacion:desc&pagination[limit]=4`;
+  const baseParams = "filters[destacado][$eq]=true&sort[0]=fecha_publicacion:desc&pagination[limit]=4";
+  const params = articlePopulate ? `${articlePopulate}&${baseParams}` : `?${baseParams}`;
   try {
-    const response = await fetchStrapi<any>(`/api/articulos${params}`);
+    const response = await fetchStrapi<any>(`${ENDPOINTS.articulos}${params}`);
     if (!response.data || !Array.isArray(response.data)) {
       return [];
     }
     return response.data.map((item: any) => formatArticulo(item));
   } catch (error) {
-    console.error("[getArticulosDestacados]", error);
+    console.warn("[getArticulosDestacados]", error);
     return [];
   }
 }
@@ -103,16 +107,17 @@ export async function getArticulosDestacados(): Promise<Articulo[]> {
 export async function getArticuloBySlug(
   slug: string
 ): Promise<Articulo | null> {
-  const params = `${articlePopulate}&filters[slug][$eq]=${encodeURIComponent(slug)}`;
+  const baseParams = `filters[slug][$eq]=${encodeURIComponent(slug)}`;
+  const params = articlePopulate ? `${articlePopulate}&${baseParams}` : `?${baseParams}`;
   try {
-    const response = await fetchStrapi<any>(`/api/articulos${params}`);
+    const response = await fetchStrapi<any>(`${ENDPOINTS.articulos}${params}`);
     if (!response.data || !Array.isArray(response.data)) {
       return null;
     }
     const item = response.data?.[0];
     return item ? formatArticulo(item) : null;
   } catch (error) {
-    console.error("[getArticuloBySlug]", error);
+    console.warn("[getArticuloBySlug]", error);
     return null;
   }
 }
@@ -120,21 +125,21 @@ export async function getArticuloBySlug(
 export async function getCategorias(): Promise<Categoria[]> {
   try {
     const response = await fetchStrapi<any>(
-      `/api/categorias?sort[0]=nombre:asc&populate=`
+      `${ENDPOINTS.categorias}?sort[0]=nombre:asc&populate=`
     );
     if (!response.data || !Array.isArray(response.data)) {
       return [];
     }
     return response.data.map((item: any) => ({
       id: item.id,
-      nombre: item.attributes.nombre,
-      slug: item.attributes.slug,
-      descripcion: item.attributes.descripcion ?? null,
-      color: item.attributes.color ?? null,
-      icono: item.attributes.icono ?? null,
+      nombre: item.nombre,
+      slug: item.slug,
+      descripcion: item.descripcion ?? null,
+      color: item.color ?? null,
+      icono: item.icono ?? null,
     }));
   } catch (error) {
-    console.error("[getCategorias]", error);
+    console.warn("[getCategorias]", error);
     return [];
   }
 }
@@ -142,132 +147,69 @@ export async function getCategorias(): Promise<Categoria[]> {
 export async function getAutores(): Promise<Autor[]> {
   try {
     const response = await fetchStrapi<any>(
-      `/api/autores?sort[0]=nombre:asc&populate=fotografia,redes_sociales`
+      `${ENDPOINTS.autores}?sort[0]=nombre:asc&populate=fotografia,redes_sociales`
     );
     if (!response.data || !Array.isArray(response.data)) {
       return [];
     }
     return response.data.map((item: any) => formatAutor(item));
   } catch (error) {
-    console.error("[getAutores]", error);
+    console.warn("[getAutores]", error);
     return [];
   }
 }
 
 export async function getEventos(): Promise<Evento[]> {
   try {
-    const response = await fetchStrapi<any>(`/api/eventos?sort[0]=fecha:desc&populate=imagen`);
+    const response = await fetchStrapi<any>(`${ENDPOINTS.eventos}?sort[0]=fecha:desc&populate=imagen`);
     if (!response.data || !Array.isArray(response.data)) {
       return [];
     }
     return response.data.map((item: any) => formatEvento(item));
   } catch (error) {
-    console.error("[getEventos]", error);
+    console.warn("[getEventos]", error);
     return [];
   }
 }
 
 function formatArticulo(item: any): Articulo {
-  const attrs = item.attributes;
+  // In Strapi v5, fields are directly on item, not in attributes
   return {
     id: item.id,
-    titulo: attrs.titulo,
-    slug: attrs.slug,
-    resumen: attrs.resumen ?? null,
-    contenido: attrs.contenido ?? null,
-    fecha_publicacion: attrs.fecha_publicacion ?? null,
-    destacado: attrs.destacado ?? false,
-    tiempo_lectura: attrs.tiempo_lectura ?? null,
-    seo_title: attrs.seo_title ?? null,
-    seo_description: attrs.seo_description ?? null,
-    imagen_principal: attrs.imagen_principal?.data
-      ? {
-          url: attrs.imagen_principal.data.attributes.url,
-          width: attrs.imagen_principal.data.attributes.width,
-          height: attrs.imagen_principal.data.attributes.height,
-          alternativeText: attrs.imagen_principal.data.attributes.alternativeText,
-        }
-      : null,
-    galeria: attrs.galeria?.data
-      ? attrs.galeria.data.map((item: any) => ({
-          url: item.attributes.url,
-          width: item.attributes.width,
-          height: item.attributes.height,
-          alternativeText: item.attributes.alternativeText,
-        }))
-      : null,
-    categoria: attrs.categoria?.data
-      ? {
-          id: attrs.categoria.data.id,
-          nombre: attrs.categoria.data.attributes.nombre,
-          slug: attrs.categoria.data.attributes.slug,
-          descripcion: attrs.categoria.data.attributes.descripcion ?? null,
-          color: attrs.categoria.data.attributes.color ?? null,
-          icono: attrs.categoria.data.attributes.icono ?? null,
-        }
-      : null,
-    autor: attrs.autor?.data
-      ? {
-          id: attrs.autor.data.id,
-          nombre: attrs.autor.data.attributes.nombre,
-          cargo: attrs.autor.data.attributes.cargo ?? null,
-          biografia: attrs.autor.data.attributes.biografia ?? null,
-          fotografia: attrs.autor.data.attributes.fotografia?.data
-            ? {
-                url: attrs.autor.data.attributes.fotografia.data.attributes.url,
-                width: attrs.autor.data.attributes.fotografia.data.attributes.width,
-                height: attrs.autor.data.attributes.fotografia.data.attributes.height,
-                alternativeText: attrs.autor.data.attributes.fotografia.data.attributes.alternativeText,
-              }
-            : null,
-          redes_sociales: attrs.autor.data.attributes.redes_sociales?.data?.map(
-            (link: any) => ({
-              platform: link.attributes.platform,
-              url: link.attributes.url,
-            })
-          ) ?? [],
-        }
-      : null,
+    titulo: item.titulo,
+    slug: item.slug,
+    resumen: item.resumen ?? null,
+    contenido: item.contenido ?? null,
+    fecha_publicacion: item.fecha_publicacion ?? null,
+    destacado: item.destacado ?? false,
+    tiempo_lectura: item.tiempo_lectura ?? null,
+    seo_title: item.seo_title ?? null,
+    seo_description: item.seo_description ?? null,
+    imagen_principal: null, // Temporarily null since populate removed
+    galeria: null, // Temporarily null since populate removed
+    categoria: null, // Temporarily null since populate removed
+    autor: null, // Temporarily null since populate removed
   };
 }
 
 function formatAutor(item: any): Autor {
-  const attrs = item.attributes;
   return {
     id: item.id,
-    nombre: attrs.nombre,
-    cargo: attrs.cargo ?? null,
-    biografia: attrs.biografia ?? null,
-    fotografia: attrs.fotografia?.data
-      ? {
-          url: attrs.fotografia.data.attributes.url,
-          width: attrs.fotografia.data.attributes.width,
-          height: attrs.fotografia.data.attributes.height,
-          alternativeText: attrs.fotografia.data.attributes.alternativeText,
-        }
-      : null,
-    redes_sociales: attrs.redes_sociales?.data?.map((link: any) => ({
-      platform: link.attributes.platform,
-      url: link.attributes.url,
-    })) ?? [],
+    nombre: item.nombre,
+    cargo: item.cargo ?? null,
+    biografia: item.biografia ?? null,
+    fotografia: null, // Temporarily null
+    redes_sociales: [], // Temporarily empty
   };
 }
 
 function formatEvento(item: any): Evento {
-  const attrs = item.attributes;
   return {
     id: item.id,
-    titulo: attrs.titulo,
-    descripcion: attrs.descripcion ?? null,
-    fecha: attrs.fecha ?? null,
-    ubicacion: attrs.ubicacion ?? null,
-    imagen: attrs.imagen?.data
-      ? {
-          url: attrs.imagen.data.attributes.url,
-          width: attrs.imagen.data.attributes.width,
-          height: attrs.imagen.data.attributes.height,
-          alternativeText: attrs.imagen.data.attributes.alternativeText,
-        }
-      : null,
+    titulo: item.titulo,
+    descripcion: item.descripcion ?? null,
+    fecha: item.fecha ?? null,
+    ubicacion: item.ubicacion ?? null,
+    imagen: null, // Temporarily null
   };
 }

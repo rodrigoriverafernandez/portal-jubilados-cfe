@@ -27,43 +27,30 @@ export default async function NoticiasPage() {
             key={articulo.id}
             className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
           >
-            {articulo.imagen_principal ? (
-              <div className="relative h-64 w-full overflow-hidden">
-                <Image
-                  src={getStrapiMediaURL(articulo.imagen_principal.url) ?? "/placeholder.png"}
-                  alt={articulo.imagen_principal.alternativeText ?? articulo.titulo}
-                  fill
-                  className="object-cover transition duration-500 group-hover:scale-105"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                />
-              </div>
-            ) : null}
             <div className="p-6">
               <div className="mb-3 flex flex-wrap items-center gap-3 text-sm text-slate-500">
                 <span>{formatDate(articulo.fecha_publicacion)}</span>
-                {articulo.categoria ? (
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.15em] text-slate-700">
-                    {articulo.categoria.nombre}
-                  </span>
-                ) : null}
               </div>
               <h2 className="text-2xl font-semibold text-slate-950">{articulo.titulo}</h2>
               <p className="mt-4 text-slate-600">{articulo.resumen}</p>
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="mt-6">
                 <Link
                   href={`/noticias/${articulo.slug}`}
                   className="rounded-full bg-slate-950 px-5 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
                 >
                   Leer noticia
                 </Link>
-                {articulo.autor ? (
-                  <span className="text-sm text-slate-500">Por {articulo.autor.nombre}</span>
-                ) : null}
               </div>
             </div>
           </article>
         ))}
       </div>
+
+      {articulos.length === 0 && (
+        <div className="text-center py-10">
+          <p className="text-slate-500">No hay artículos disponibles.</p>
+        </div>
+      )}
     </div>
   );
 }

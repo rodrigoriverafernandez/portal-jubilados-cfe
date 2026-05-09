@@ -22,15 +22,17 @@ npm run start
 yarn start
 ```
 
-### `build`
+### `seed`
 
-Build your admin panel. [Learn more](https://docs.strapi.io/dev-docs/cli#strapi-build)
+Populate the database with sample data for development and testing. This command creates initial content including categories, authors, articles, events, and documents.
 
 ```
-npm run build
+npm run seed
 # or
-yarn build
+yarn seed
 ```
+
+**Note:** Run this command after setting up the database and before starting the application to have sample data available.
 
 ## ⚙️ Deployment
 
