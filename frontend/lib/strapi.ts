@@ -6,7 +6,10 @@ import type { Articulo, Autor, Categoria, Evento, StrapiResponse } from "./types
  * - On client (browser): http://localhost:1337 (external access)
  */
 function getApiUrl(): string {
-  // For development, always use localhost since Next.js runs on host
+  if (typeof window === "undefined") {
+    return process.env.STRAPI_API_URL || "http://strapi:1337";
+  }
+
   return process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 }
 
@@ -25,10 +28,11 @@ const ENDPOINTS = {
  */
 async function fetchStrapi<T>(path: string): Promise<StrapiResponse<T>> {
   const url = `${API_URL}${path}`;
+  console.log("URL_STRAPI:", url);
   
   try {
     const response = await fetch(url, {
-      next: { revalidate: 60 },
+      cache: "no-store",
       headers: {
         "Content-Type": "application/json",
       },
@@ -57,6 +61,7 @@ async function fetchStrapi<T>(path: string): Promise<StrapiResponse<T>> {
     }
 
     const data = (await response.json()) as StrapiResponse<T>;
+    console.log("RESPUESTA_STRAPI:", data);
     return data;
   } catch (error) {
     // Handle network errors, CORS issues, etc.
@@ -72,11 +77,11 @@ async function fetchStrapi<T>(path: string): Promise<StrapiResponse<T>> {
   }
 }
 
-const articlePopulate = ""; // Temporarily removed populate to avoid errors
+const articlePopulate = "?populate=*";
 
 export async function getArticulos(): Promise<Articulo[]> {
   const baseParams = "sort[0]=fecha_publicacion:desc&pagination[limit]=12";
-  const params = articlePopulate ? `${articlePopulate}&${baseParams}` : `?${baseParams}`;
+  const params = `${articlePopulate}&${baseParams}`;
   try {
     const response = await fetchStrapi<any>(`${ENDPOINTS.articulos}${params}`);
     if (!response.data || !Array.isArray(response.data)) {
@@ -174,6 +179,13 @@ export async function getEventos(): Promise<Evento[]> {
 
 function formatArticulo(item: any): Articulo {
   // In Strapi v5, fields are directly on item, not in attributes
+  const getImageUrl = (image: any) => {
+    if (!image) return null;
+    // Priority: medium > small > original
+    const url = image.formats?.medium?.url || image.formats?.small?.url || image.url;
+    return url ? getStrapiMediaURL(url) : null;
+  };
+
   return {
     id: item.id,
     titulo: item.titulo,
@@ -185,10 +197,15 @@ function formatArticulo(item: any): Articulo {
     tiempo_lectura: item.tiempo_lectura ?? null,
     seo_title: item.seo_title ?? null,
     seo_description: item.seo_description ?? null,
-    imagen_principal: null, // Temporarily null since populate removed
-    galeria: null, // Temporarily null since populate removed
-    categoria: null, // Temporarily null since populate removed
-    autor: null, // Temporarily null since populate removed
+    imagen_principal: item.imagen_principal ? {
+      url: getImageUrl(item.imagen_principal),
+      width: item.imagen_principal.width,
+      height: item.imagen_principal.height,
+      alternativeText: item.imagen_principal.alternativeText,
+    } : null,
+    galeria: null, // Temporarily null
+    categoria: null, // Temporarily null
+    autor: null, // Temporarily null
   };
 }
 
