@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import SearchBox from "./SearchBox";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -50,11 +51,7 @@ export default function Navbar() {
           <div className="flex items-center space-x-4">
             {/* Search */}
             <div className="hidden md:block">
-              <input
-                type="text"
-                placeholder="Buscar..."
-                className="w-64 px-4 py-2 border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
-              />
+              <SearchBox />
             </div>
 
             {/* Accessibility Button */}
@@ -106,11 +103,7 @@ export default function Navbar() {
                 Contacto
               </Link>
               <div className="px-3 py-2">
-                <input
-                  type="text"
-                  placeholder="Buscar..."
-                  className="w-full px-4 py-2 border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
-                />
+                <SearchBox />
               </div>
             </div>
           </div>

@@ -652,6 +652,7 @@ export interface ApiEventoEvento extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
+    slug: Schema.Attribute.String;
     titulo: Schema.Attribute.String & Schema.Attribute.Required;
     ubicacion: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
