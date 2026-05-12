@@ -1,5 +1,6 @@
 export type MediaImage = {
   url: string;
+  name?: string | null;
   width?: number;
   height?: number;
   alternativeText?: string | null;
@@ -45,13 +46,14 @@ export type Articulo = {
   autor?: Autor | null;
 };
 
-export type Evento = {
+export type Documento = {
   id: number;
   titulo: string;
   descripcion?: string | null;
-  fecha?: string | null;
-  ubicacion?: string | null;
-  imagen?: MediaImage | null;
+  archivo_pdf?: MediaImage | null;
+  categoria?: Categoria | null;
+  fecha_publicacion?: string | null;
+  destacado?: boolean;
 };
 
 export type StrapiResponse<T> = {
